@@ -36,13 +36,15 @@ int main(void) {
   uint32_t kernelFileSize = ftell(kernelFile);
   fseek(kernelFile, 0, SEEK_SET);
 
-  char* kernelFileBuffer = (char*)malloc(sizeof(char*) * kernelFileSize);
+  char* kernelFileBuffer = (char*)malloc(kernelFileSize + 1);
   fread(kernelFileBuffer, 1, kernelFileSize, kernelFile);
   fclose(kernelFile);
+  kernelFileBuffer[kernelFileSize] = '\0';
 
   cl_program program = clCreateProgramWithSource(context, 1, (const char**)&kernelFileBuffer, NULL, &error);
   clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
   printKernelBuildLog(deviceID, program);
+  free(kernelFileBuffer);
 
   cl_kernel kernel = clCreateKernel(program, "squareKernel", &error);
 

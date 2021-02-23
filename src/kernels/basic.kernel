@@ -1,7 +1,12 @@
 __kernel void squareKernel(__global float* input, __global float* output) {
   size_t idX = get_global_id(0);
   size_t idY = get_global_id(1);
-  size_t id = idY * 512 + idX;
+  double id = idY * 512 + idX;
 
-  output[id] = input[id] * input[id];
+  double value = sqrt(id * id) / sqrt(id * id);
+  for (int x = 0; x < 10000; x++) {
+    value /= sqrt(value * value) * x;
+  }
+
+  output[(int)id] = value;
 }
