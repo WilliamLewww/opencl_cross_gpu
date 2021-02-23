@@ -46,25 +46,24 @@ int main(void) {
 
   cl_kernel kernel = clCreateKernel(program, "squareKernel", &error);
 
-  float inputHost[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  float outputHost[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  cl_mem inputDevice = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(float) * 10, NULL, NULL);
-  cl_mem outputDevice = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * 10, NULL, NULL);
-  clEnqueueWriteBuffer(commandQueue, inputDevice, CL_TRUE, 0, sizeof(float) * 10, inputHost, 0, NULL, NULL);
+  // 512 * 512
+  #define DATA_COUNT 262144
 
-  const uint64_t globalSize = 10;
-  const uint64_t blockSize = 1;
+  float inputHost[DATA_COUNT] = {0};
+  float outputHost[DATA_COUNT] = {0};
+  cl_mem inputDevice = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(float) * DATA_COUNT, NULL, NULL);
+  cl_mem outputDevice = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * DATA_COUNT, NULL, NULL);
+  clEnqueueWriteBuffer(commandQueue, inputDevice, CL_TRUE, 0, sizeof(float) * DATA_COUNT, inputHost, 0, NULL, NULL);
+
+  const uint64_t globalSize[2] = {512, 512};
+  const uint64_t blockSize[2] = {32, 32};
 
   clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputDevice);
   clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputDevice);
-  clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL, &globalSize, &blockSize, 0, NULL, NULL);
+  clEnqueueNDRangeKernel(commandQueue, kernel, 2, NULL, globalSize, blockSize, 0, NULL, NULL);
   clFinish(commandQueue);
 
-  clEnqueueReadBuffer(commandQueue, outputDevice, CL_TRUE, 0, sizeof(float) * 10, outputHost, 0, NULL, NULL);
-
-  for (int x = 0; x < 10; x++) {
-    printf("%f\n", outputHost[x]);
-  }
+  clEnqueueReadBuffer(commandQueue, outputDevice, CL_TRUE, 0, sizeof(float) * DATA_COUNT, outputHost, 0, NULL, NULL);
 
   clReleaseMemObject(outputDevice);
   clReleaseMemObject(inputDevice);
