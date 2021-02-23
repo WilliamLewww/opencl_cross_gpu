@@ -1,6 +1,7 @@
 #define CL_TARGET_OPENCL_VERSION 300
 
 #include <stdio.h>
+#include <time.h>
 
 #include <CL/cl.h>
 
@@ -26,8 +27,8 @@ int main(void) {
   free(deviceName);
 
   cl_int error;
-  cl_context_properties properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformID, 0 };
-  cl_context context = clCreateContext(properties, 1, &deviceID, NULL, NULL, &error);
+  cl_context_properties contextProperties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platformID, 0 };
+  cl_context context = clCreateContext(contextProperties, 1, &deviceID, NULL, NULL, &error);
 
   cl_command_queue commandQueue = clCreateCommandQueueWithProperties(context, deviceID, NULL, &error);
 
@@ -60,10 +61,20 @@ int main(void) {
   const uint64_t globalSize[2] = {512, 512};
   const uint64_t blockSize[2] = {32, 32};
 
+
+  clock_t start;
+  clock_t end;
+
+  cl_event event;
   clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputDevice);
   clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputDevice);
-  clEnqueueNDRangeKernel(commandQueue, kernel, 2, NULL, globalSize, blockSize, 0, NULL, NULL);
-  clFinish(commandQueue);
+  start = clock();
+  clEnqueueNDRangeKernel(commandQueue, kernel, 2, NULL, globalSize, blockSize, 0, NULL, &event);
+  clWaitForEvents(1, &event);
+  end = clock();
+
+  double timeSeconds = (double)(end - start) / (double)CLOCKS_PER_SEC;
+  printf("Kernel Execution Time: %lf\n", timeSeconds);
 
   clEnqueueReadBuffer(commandQueue, outputDevice, CL_TRUE, 0, sizeof(float) * DATA_COUNT, outputHost, 0, NULL, NULL);
 
