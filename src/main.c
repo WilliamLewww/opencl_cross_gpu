@@ -49,8 +49,8 @@ int main(void) {
 
   cl_kernel kernel = clCreateKernel(program, "squareKernel", &error);
 
-  // 512 * 512
-  #define DATA_COUNT 262144
+  // 64 * 64
+  #define DATA_COUNT 4096
 
   float inputHost[DATA_COUNT] = {0};
   float outputHost[DATA_COUNT] = {0};
@@ -58,7 +58,7 @@ int main(void) {
   cl_mem outputDevice = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * DATA_COUNT, NULL, NULL);
   clEnqueueWriteBuffer(commandQueue, inputDevice, CL_TRUE, 0, sizeof(float) * DATA_COUNT, inputHost, 0, NULL, NULL);
 
-  const uint64_t globalSize[2] = {512, 512};
+  const uint64_t globalSize[2] = {64, 64};
   const uint64_t blockSize[2] = {32, 32};
 
   clock_t start;
