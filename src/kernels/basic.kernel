@@ -4,7 +4,7 @@ __kernel void squareKernel(__global float* input, __global float* output) {
   double id = idY * 512 + idX;
 
   double value = sqrt(id * id) / sqrt(id * id);
-  for (int x = 0; x < 10000; x++) {
+  for (int x = 0; x < 50000; x++) {
     value /= sqrt(value * value) * x;
   }
 
