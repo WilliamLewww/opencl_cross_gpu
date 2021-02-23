@@ -61,7 +61,6 @@ int main(void) {
   const uint64_t globalSize[2] = {512, 512};
   const uint64_t blockSize[2] = {32, 32};
 
-
   clock_t start;
   clock_t end;
 
@@ -77,6 +76,10 @@ int main(void) {
   printf("Kernel Execution Time: %lf\n", timeSeconds);
 
   clEnqueueReadBuffer(commandQueue, outputDevice, CL_TRUE, 0, sizeof(float) * DATA_COUNT, outputHost, 0, NULL, NULL);
+
+  for (int x = 0; x < 50; x++) {
+    printf("%f\n", outputHost[x]);
+  }
 
   clReleaseMemObject(outputDevice);
   clReleaseMemObject(inputDevice);
